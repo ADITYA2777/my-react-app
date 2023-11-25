@@ -1,11 +1,19 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./Header";
+import { checkvaldation } from "../utils/Validations";
 
 const Login = () => {
   const [isSignInFrom, setIsSignInFrom] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null)
+  
+  const email = useRef(null)
+  const password = useRef(null)
 
   const handlerValdationBtn = () => {
-    
+    console.log(email.current.value);
+    console.log(password.current.value);
+    const message = checkvaldation(email.current.value,password.current.value)
+   setErrorMessage(message);
   }
 
   const toggleSignInFrom = () => {
@@ -20,7 +28,10 @@ const Login = () => {
           alt="background pages"
         />
       </div>
-      <form className=" w-3/12 absolute p-12 bg-black/80 my-36 mx-auto right-0 left-0 text-white rounded-xl">
+      <form
+        onSubmit={(e) => e.preventDefault()}
+        className=" w-3/12 absolute p-12 bg-black/80 my-36 mx-auto right-0 left-0 text-white rounded-xl"
+      >
         <h1 className="text-3xl font-bold py-4">
           {isSignInFrom ? "Sign IN" : "Sign Up"}
         </h1>
@@ -32,16 +43,22 @@ const Login = () => {
           />
         )}
         <input
+          ref={email}
           type="text"
           className="p-2 my-4 text-white w-full  bg-gray-700"
           placeholder="Email Address"
         />
         <input
+          ref={password}
           type="text"
           className="p-2 my-4 text-white w-full bg-gray-700"
           placeholder="Password"
         />
-        <button className="p-2 my-6 bg-red-500 w-full rounded-xl" onChange={handlerValdationBtn}>
+        <p className="text-red-600">{errorMessage}</p>
+        <button
+          className="p-2 my-6 bg-red-500 w-full rounded-xl"
+          onClick={handlerValdationBtn}
+        >
           {isSignInFrom ? "Sign in" : "Sign up"}
         </button>
         <p className="py-4 cursor-pointer" onClick={toggleSignInFrom}>

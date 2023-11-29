@@ -1,6 +1,8 @@
 import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { checkvaldation } from "../utils/Validations";
+import {createUserWithEmailAndPassword, signInWithEmailAndPassword} from "firebase/auth";
+import { auth } from "../utils/Firebase";
 
 const Login = () => {
   const [isSignInFrom, setIsSignInFrom] = useState(true);
@@ -13,7 +15,47 @@ const Login = () => {
     console.log(email.current.value);
     console.log(password.current.value);
     const message = checkvaldation(email.current.value,password.current.value)
-   setErrorMessage(message);
+    setErrorMessage(message);
+    
+    if (message) return;
+
+    if (!isSignInFrom) {
+      // sign up logic
+  createUserWithEmailAndPassword(
+    auth,
+    email.current.value,
+    password.current.value
+  )
+    .then((userCredential) => {
+      // Signed up
+      const user = userCredential.user;
+     console.log(user);
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      setErrorMessage(errorCode + "-" + errorMessage)
+      // ..
+    });
+      
+    } else {
+      // sign  in logic
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+        console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage)
+        });
+    }
   }
 
   const toggleSignInFrom = () => {

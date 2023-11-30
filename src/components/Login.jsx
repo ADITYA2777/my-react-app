@@ -1,43 +1,73 @@
 import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { checkvaldation } from "../utils/Validations";
-import {createUserWithEmailAndPassword, signInWithEmailAndPassword} from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { auth } from "../utils/Firebase";
+import { useNavigate } from "react-router-dom";
+import { addUser } from "../utils/userSlices";
+import { useDispatch } from "react-redux";
 
 const Login = () => {
+ const  dispatch = useDispatch()
+  const navgaite = useNavigate();
   const [isSignInFrom, setIsSignInFrom] = useState(true);
-  const [errorMessage, setErrorMessage] = useState(null)
-  
-  const email = useRef(null)
-  const password = useRef(null)
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const name = useRef(null);
+  const email = useRef(null);
+  const password = useRef(null);
 
   const handlerValdationBtn = () => {
     console.log(email.current.value);
     console.log(password.current.value);
-    const message = checkvaldation(email.current.value,password.current.value)
+    const message = checkvaldation(email.current.value, password.current.value);
     setErrorMessage(message);
-    
+
     if (message) return;
 
     if (!isSignInFrom) {
       // sign up logic
-  createUserWithEmailAndPassword(
-    auth,
-    email.current.value,
-    password.current.value
-  )
-    .then((userCredential) => {
-      // Signed up
-      const user = userCredential.user;
-     console.log(user);
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      setErrorMessage(errorCode + "-" + errorMessage)
-      // ..
-    });
-      
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          updateProfile(user,{
+            displayName:name.current.value,
+            photoURL:
+              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZ8gBIedMzk0uUpH4dDzMXY40APNoNaCoRbA&usqp=CAU",
+          })
+            .then(() => {
+              // Profile updated!
+               const { uid, email, displayName, photoURL } = auth.currentUser;
+               dispatch(
+                 addUser({
+                   uid: uid,
+                   email: email,
+                   displayName: displayName,
+                   photoURL: photoURL,
+                 })
+               );
+              navgaite("/browse")
+            })
+            .catch((error) => {
+             setErrorMessage(error.message)
+            });
+         
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
+          // ..
+        });
     } else {
       // sign  in logic
       signInWithEmailAndPassword(
@@ -48,15 +78,16 @@ const Login = () => {
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
-        console.log(user);
+          console.log(user);
+          navgaite("/browse");
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          setErrorMessage(errorCode + "-" + errorMessage)
+          setErrorMessage(errorCode + "-" + errorMessage);
         });
     }
-  }
+  };
 
   const toggleSignInFrom = () => {
     setIsSignInFrom(!isSignInFrom);
@@ -79,6 +110,7 @@ const Login = () => {
         </h1>
         {!isSignInFrom && (
           <input
+            
             type="text"
             className="p-2 my-4 text-white w-full  bg-gray-700"
             placeholder="Enter your Name"

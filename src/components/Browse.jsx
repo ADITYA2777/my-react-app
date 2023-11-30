@@ -1,8 +1,13 @@
 import React from 'react'
+import Header from './Header'
+import FooterPage from './FooterPage'
 
 const Browse = () => {
   return (
-    <div>Browse</div>
+    <div>
+      <Header />
+     {/* <FooterPage/> */}
+    </div>
   )
 }
 
